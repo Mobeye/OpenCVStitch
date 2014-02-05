@@ -76,6 +76,9 @@
                 UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Stitch error" message:@"Couldn't stitch the provided images" delegate:self cancelButtonTitle:@":(" otherButtonTitles:nil];
                 [alert show];
             }
+
+            UIImageWriteToSavedPhotosAlbum(stitchedImage, nil, nil, nil);
+
             UIImageView* imageView = [[UIImageView alloc] initWithImage:stitchedImage];
             self.imageView = imageView;
             [self.scrollView addSubview:imageView];
