@@ -11,7 +11,7 @@
 
 @interface CVViewController () {
     NSMutableArray *imageArray;
-    UIImagePickerController *picker;
+    UIImagePickerController *imagePicker;
     BOOL isStitching;
 }
 
@@ -21,7 +21,7 @@
 
 - (void)viewDidLoad {
     imageArray = [NSMutableArray array];
-    picker = [[UIImagePickerController alloc] init];
+    imagePicker = [[UIImagePickerController alloc] init];
     isStitching = NO;
 }
 
@@ -30,19 +30,20 @@
     [super viewDidAppear:animated];
 
     if (!isStitching) {
-        picker.delegate = self;
-        picker.allowsEditing = YES;
-        picker.sourceType = UIImagePickerControllerSourceTypeCamera;
-        picker.cameraCaptureMode = UIImagePickerControllerCameraCaptureModePhoto;
+        imagePicker.delegate = self;
+        imagePicker.allowsEditing = YES; //TODO disable editing
+        imagePicker.sourceType = UIImagePickerControllerSourceTypeCamera;
+        imagePicker.cameraCaptureMode = UIImagePickerControllerCameraCaptureModePhoto;
 
         UIButton *button = [[UIButton alloc] init];
         [button setTitle:@"Stitch" forState:UIControlStateNormal];
-        [button setFrame:CGRectMake(30, 200, 100, 30)];
+        [button setFrame:CGRectMake(0, 30, 320, 10)];
+        [button.titleLabel setBackgroundColor:[UIColor redColor]];
+        [button.titleLabel setTextAlignment:NSTextAlignmentCenter];
         [button addTarget:self action:@selector(stitch) forControlEvents:UIControlEventTouchUpInside];
-        [picker.view addSubview:button];
+        [imagePicker.view addSubview:button];
 
-        [self presentModalViewController:picker animated:YES];
-
+        [self presentModalViewController:imagePicker animated:YES];
     }
 
 }
@@ -63,7 +64,7 @@
 - (void) stitch
 {
     isStitching = YES;
-    [picker dismissViewControllerAnimated:YES completion:nil];
+    [imagePicker dismissViewControllerAnimated:YES completion:nil];
     [self.spinner startAnimating];
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 
@@ -72,7 +73,7 @@
 
             NSLog (@"stitchedImage %@",stitchedImage);
             if (!stitchedImage) {
-                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"dff" message:@"dfdsf" delegate:self cancelButtonTitle:@"don" otherButtonTitles:@"sd", nil];
+                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Stitch error" message:@"Couldn't stitch the provided images" delegate:self cancelButtonTitle:@":(" otherButtonTitles:nil];
                 [alert show];
             }
             UIImageView* imageView = [[UIImageView alloc] initWithImage:stitchedImage];
