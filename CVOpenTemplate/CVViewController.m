@@ -15,6 +15,7 @@
     NSMutableArray *imageArray;
     CVAVFViewController *camera;
     BOOL isStitching;
+    UIImageView *outputImageView;
 }
 
 @end
@@ -42,7 +43,11 @@
 
     UIImage *images = [image fixOrientation];
 
-    UIImageWriteToSavedPhotosAlbum(images, nil, nil, nil);
+
+    CGSize imageSize = images.size;
+
+    NSLog(NSStringFromCGSize(imageSize));
+
     [imageArray addObject:images];
     for (UIView *view in self.view.subviews) {
         if (view.tag == 1337) {
@@ -75,19 +80,20 @@
             if (!stitchedImage) {
                 UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Stitch error" message:@"Couldn't stitch the provided images" delegate:self cancelButtonTitle:@":(" otherButtonTitles:nil];
                 [alert show];
+            } else {
+                UIImageWriteToSavedPhotosAlbum(stitchedImage, nil, nil, nil);
+
+                outputImageView = [[UIImageView alloc] initWithImage:stitchedImage];
+                self.imageView = outputImageView;
+                [self.scrollView addSubview:outputImageView];
+                self.scrollView.backgroundColor = [UIColor blackColor];
+                self.scrollView.contentSize = self.imageView.bounds.size;
+                self.scrollView.maximumZoomScale = 4.0;
+                self.scrollView.minimumZoomScale = 0.05;
+                self.scrollView.contentOffset = CGPointMake(-(self.scrollView.bounds.size.width-self.imageView.bounds.size.width)/2, -(self.scrollView.bounds.size.height-self.imageView.bounds.size.height)/2);
+                NSLog (@"scrollview contentSize %@",NSStringFromCGSize(self.scrollView.contentSize));
             }
-
-            UIImageWriteToSavedPhotosAlbum(stitchedImage, nil, nil, nil);
-
-            UIImageView* imageView = [[UIImageView alloc] initWithImage:stitchedImage];
-            self.imageView = imageView;
-            [self.scrollView addSubview:imageView];
-            self.scrollView.backgroundColor = [UIColor blackColor];
-            self.scrollView.contentSize = self.imageView.bounds.size;
-            self.scrollView.maximumZoomScale = 4.0;
-            self.scrollView.minimumZoomScale = 0.05;
-            self.scrollView.contentOffset = CGPointMake(-(self.scrollView.bounds.size.width-self.imageView.bounds.size.width)/2, -(self.scrollView.bounds.size.height-self.imageView.bounds.size.height)/2);
-            NSLog (@"scrollview contentSize %@",NSStringFromCGSize(self.scrollView.contentSize));
+            
             [self.spinner stopAnimating];
 
         });
@@ -112,4 +118,13 @@
 }
 
 
+- (IBAction)retry:(id)sender {
+    imageArray = [NSMutableArray array];
+    isStitching = NO;
+    camera = [[CVAVFViewController alloc] init];
+    [camera setDelegate:self];
+    [camera.photoCamera setDelegate:self];
+    [outputImageView removeFromSuperview];
+    [self presentViewController:camera animated:YES completion:nil];
+}
 @end

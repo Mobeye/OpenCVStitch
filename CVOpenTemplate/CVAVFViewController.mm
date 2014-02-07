@@ -49,11 +49,11 @@
         cameraPreview = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height)];
         self.photoCamera = [[CvPhotoCamera alloc] initWithParentView:cameraPreview];
         self.photoCamera.defaultAVCaptureDevicePosition = AVCaptureDevicePositionBack;
-        self.photoCamera.defaultAVCaptureSessionPreset = AVCaptureSessionPresetPhoto;
+        self.photoCamera.defaultAVCaptureSessionPreset = AVCaptureSessionPresetHigh;
         self.photoCamera.defaultAVCaptureVideoOrientation = AVCaptureVideoOrientationPortrait;
         self.photoCamera.defaultFPS = 30;
 
-        self.lastImageView = [[UIImageView alloc] initWithFrame:CGRectMake(-(self.view.frame.size.width/2), 0, self.view.frame.size.width, self.view.frame.size.height)];
+        self.lastImageView = [[UIImageView alloc] initWithFrame:CGRectMake(self.view.frame.size.width * -65/100, 0, self.view.frame.size.width, self.view.frame.size.height)];
         [self.lastImageView setImage:nil];
         [self.lastImageView setContentMode:UIViewContentModeScaleAspectFill];
         [self.lastImageView setAlpha:0.5];
