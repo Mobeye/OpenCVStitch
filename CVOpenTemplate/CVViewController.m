@@ -8,10 +8,12 @@
 
 #import "CVViewController.h"
 #import "CVWrapper.h"
+#import "CVAVFViewController.h"
+#import "UIImage+fixOrientation.h"
 
 @interface CVViewController () {
     NSMutableArray *imageArray;
-    UIImagePickerController *imagePicker;
+    CVAVFViewController *camera;
     BOOL isStitching;
 }
 
@@ -21,8 +23,10 @@
 
 - (void)viewDidLoad {
     imageArray = [NSMutableArray array];
-    imagePicker = [[UIImagePickerController alloc] init];
     isStitching = NO;
+    camera = [[CVAVFViewController alloc] init];
+    [camera setDelegate:self];
+    [camera.photoCamera setDelegate:self];
 }
 
 - (void)viewDidAppear:(BOOL)animated
@@ -30,41 +34,37 @@
     [super viewDidAppear:animated];
 
     if (!isStitching) {
-        imagePicker.delegate = self;
-        imagePicker.allowsEditing = YES; //TODO disable editing
-        imagePicker.sourceType = UIImagePickerControllerSourceTypeCamera;
-        imagePicker.cameraCaptureMode = UIImagePickerControllerCameraCaptureModePhoto;
+        [self presentViewController:camera animated:YES completion:nil];
+    }
+}
 
-        UIButton *button = [[UIButton alloc] init];
-        [button setTitle:@"Stitch" forState:UIControlStateNormal];
-        [button setFrame:CGRectMake(0, 30, 320, 10)];
-        [button.titleLabel setBackgroundColor:[UIColor redColor]];
-        [button.titleLabel setTextAlignment:NSTextAlignmentCenter];
-        [button addTarget:self action:@selector(stitch) forControlEvents:UIControlEventTouchUpInside];
-        [imagePicker.view addSubview:button];
+- (void)photoCamera:(CvPhotoCamera *)photoCamera capturedImage:(UIImage *)image {
 
-        [self presentModalViewController:imagePicker animated:YES];
+    UIImage *images = [image fixOrientation];
+
+    UIImageWriteToSavedPhotosAlbum(images, nil, nil, nil);
+    [imageArray addObject:images];
+    for (UIView *view in self.view.subviews) {
+        if (view.tag == 1337) {
+            [view removeFromSuperview];
+        }
     }
 
+    if (imageArray.count > 0) {
+        UIImage *lastimg = (UIImage *)imageArray.lastObject;
+        [camera.lastImageView setImage:lastimg];
+        [camera reloadInputViews];
+    }
 }
 
-- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info {
-
-    UIImage *chosenImage = info[UIImagePickerControllerEditedImage];
-    [imageArray addObject:chosenImage];
-    [picker dismissModalViewControllerAnimated:YES];
-}
-
-- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker {
-
-    [picker dismissModalViewControllerAnimated:YES];
+- (void)photoCameraCancel:(CvPhotoCamera *)photoCamera {
 
 }
 
 - (void) stitch
 {
     isStitching = YES;
-    [imagePicker dismissViewControllerAnimated:YES completion:nil];
+    [camera dismissViewControllerAnimated:YES completion:nil];
     [self.spinner startAnimating];
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 
@@ -96,7 +96,7 @@
 
 - (BOOL) shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
 {
-    return YES;
+    return NO;
 }
 - (void)didReceiveMemoryWarning
 {

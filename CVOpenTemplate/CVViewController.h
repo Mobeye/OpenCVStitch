@@ -7,8 +7,9 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <opencv2/highgui/cap_ios.h>
 
-@interface CVViewController : UIViewController <UIImagePickerControllerDelegate, UINavigationControllerDelegate>
+@interface CVViewController : UIViewController <UIImagePickerControllerDelegate, UINavigationControllerDelegate, CvPhotoCameraDelegate>
 
 @property (weak, nonatomic) IBOutlet UIActivityIndicatorView* spinner;
 @property (nonatomic, weak) IBOutlet UIImageView* imageView;
